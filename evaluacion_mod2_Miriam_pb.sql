@@ -94,9 +94,18 @@ WHERE title = "Indian Love";
 -- Muestra el título de todas las películas que contengan la palabra "dog" o "cat" en su descripción.
 -- entiendo que como pide que contengan la PALABRA dog o cat, el output de "%dog%" o "%cat%" no seria correcto
 -- porque aparecen titulos con esas silabas y no palabras como tal, por lo que no hay peliculas que tengan esas palabras.
+
 SELECT title AS peliculas_con_dog_o_cat
 FROM film
 WHERE title LIKE "% dog %" OR title LIKE "% cat %";
+
+/*SELECT title AS peliculas_con_dog_o_cat
+FROM film
+WHERE title LIKE "% dog %"
+UNION
+SELECT title AS peliculas_con_dog_o_cat
+FROM film
+WHERE title LIKE "% cat %";*/ -- otra forma de resolver este ejercicio es con UNION, que juntaría las que tiene dog y las que tienen cat sin repetirlas, personalmente prefiero la solución de arriba
 
 -- Hay algún actor o actriz que no aparezca en ninguna película en la tabla film_actor.
 -- NO
@@ -158,11 +167,20 @@ HAVING COUNT(film_id) >= 5;
 
 -- Encuentra el título de todas las películas que fueron alquiladas por más de 5 días. Utiliza una subconsulta para encontrar los rental_ids con una duración superior a 5 días y luego selecciona las películas correspondientes.
 -- este codigo que pruebo primero no sirve : SELECT return_date - rental_date AS duracion FROM rental; por lo que me apoyo en recursos externos para llegar a la conclusión correcta
--- en este caso pruebo con DATEDIFF()
+-- en este caso pruebo con DATEDIFF() y devuelve los dias de alquiler
+-- para comprobar saco DATEDIFF(return_date, rental_date) tambien
 
-SELECT DATEDIFF(DAY, fecha_inicio, fecha_fin) AS dias;
-
-
+SELECT DISTINCT title AS peliculas_alquiladas_mas5dias -- distinct porque si no se reppiten las mismas peliculas si fueron alquiladas varias veces mas de 5 dias 
+FROM film
+INNER JOIN inventory USING (film_id)
+INNER JOIN rental USING (inventory_id)
+WHERE rental_id IN (SELECT rental_id
+			FROM rental
+			WHERE DATEDIFF(return_date, rental_date) > 5);
+                            
+/*SELECT DATEDIFF(return_date, rental_date) AS dias, rental_id
+FROM rental
+WHERE DATEDIFF(return_date, rental_date) > 5;*/ -- subconsulta
 
 -- Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría "Horror". Utiliza una subconsulta para encontrar los actores que han actuado en películas de la categoría "Horror" y luego exclúyelos de la lista de actores.
 
