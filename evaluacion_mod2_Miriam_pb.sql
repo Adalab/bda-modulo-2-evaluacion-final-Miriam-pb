@@ -170,7 +170,7 @@ HAVING COUNT(film_id) >= 5;
 -- en este caso pruebo con DATEDIFF() y devuelve los dias de alquiler
 -- para comprobar saco DATEDIFF(return_date, rental_date) tambien
 
-SELECT DISTINCT title AS peliculas_alquiladas_mas5dias -- distinct porque si no se reppiten las mismas peliculas si fueron alquiladas varias veces mas de 5 dias 
+SELECT DISTINCT title AS peliculas_alquiladas_mas5dias -- distinct porque si no se repiten las mismas peliculas si fueron alquiladas varias veces mas de 5 dias 
 FROM film
 INNER JOIN inventory USING (film_id)
 INNER JOIN rental USING (inventory_id)
@@ -210,5 +210,26 @@ INNER JOIN film_category USING (film_id)
 INNER JOIN category USING (category_id)
 WHERE name = "Comedy" AND length > 180; -- dan igual las mayúsculas pero yo las pongo
 
-
+-- ----------------------------------------------------------------------------------------------------------------------------------
 -- BONUS
+-- Encuentra todos los actores que han actuado juntos en al menos una película. 
+-- La consulta debe mostrar el nombre y apellido de los actores y el número de películas en las que han actuado juntos.
+-- me imagino que habra que hacer un COUNT((GROUP BY film_id))
+-- el enunciado quiere decir todos los actor_id que tengan el mismo film_id y contar cuantas veces pasa esto entonces:
+SELECT COUNT(actor_id), film_id
+FROM film
+LEFT JOIN film_actor USING (film_id)
+LEFT JOIN actor USING (actor_id)
+GROUP BY film_id;
+-- con esta query sabemos cuantos actores hay en cada pelicula, pero queremos saber nombre y apellido por pelicula
+SELECT first_name AS nombre_actor,last_name AS apellido_actor, COUNT() AS num_peliculas_juntos
+FROM actor
+GROUP BY actor_id
+HAVING COUNT() >= 1;
+-- diferente actor_id mismo film_id
+SELECT a.first_name AS nombre_actor, a.last_name AS apellido_actor, COUNT(f.film_id) AS num_peliculas_juntos
+FROM film AS f, film AS g
+INNER JOIN actor AS a, actor AS b
+GROUP BY a.actor_id
+HAVING COUNT(f.film_id) >= 1 AND a.actor_id <> b.actor_id AND f.film_id = g.film_id; -- se rompe 
+-- hasta aqui.
